@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  db:
+    image: mongo:5.0.6-focal
+    ports:
+      - "27017:27017"
+    networks:
+      - ledger-pay-link-app
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  ledger-pay-link-app:
+    driver: bridge
+volumes:
+  mongo-data:
+    driver: local
