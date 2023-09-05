@@ -1,18 +1,19 @@
 version: "3"
 services:
-
   db:
-    image: mongo:5.0.6-focal
+    image: postgres:12
+    restart: always
     ports:
-      - "27017:27017"
-    networks:
-      - ledger-pay-link-app
-    volumes:
-      - mongo-data:/data/db
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nestjs
 
-networks:
-  ledger-pay-link-app:
-    driver: bridge
-volumes:
-  mongo-data:
-    driver: local
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+
+
