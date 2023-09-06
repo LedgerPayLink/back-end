@@ -19,6 +19,7 @@ model User {
   hash     String
   hashedRt String?
   Eoa      Eoa[]
+  PayLink  PayLink[]
 }
 
 model Eoa {
@@ -33,4 +34,14 @@ model Eoa {
   ownerId      String
 
   @@unique([chainId, symbol, address, ownerId])
+}
+
+model PayLink {
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  priceAmount        Int
+  fiatCurrency       String
+  destinationChainId Int
+  owner              User     @relation(fields: [ownerId], references: [id])
+  ownerId            String
 }

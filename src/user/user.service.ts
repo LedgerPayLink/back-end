@@ -11,11 +11,7 @@ export class UserService {
 
     async addEOA(userId: string, eoa: EoaDto) {
 
-        const user = await this.prismaService.user.findUnique({
-            where: {
-                id: userId
-            }
-        }).then(u => u);
+        const user = await this.getUser(userId).then(u => u);
         if (!user) throw new ForbiddenException("Access Denied")
 
         const chainFound = CHAINS.find(c => c.chainId == eoa.chainId)
@@ -46,7 +42,15 @@ export class UserService {
                 tokenAddress: tokenAddress,
                 nativeToken: native,
                 address: eoa.address,
-                ownerId: userId
+                ownerId: user.id
+            }
+        })
+    }
+
+    async getUser(userId: string) {
+        return this.prismaService.user.findUnique({
+            where: {
+                id: userId
             }
         })
     }
