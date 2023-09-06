@@ -2,9 +2,7 @@ import {Body, CanActivate, Controller, HttpCode, HttpStatus, Post, Req, UseGuard
 import {AuthService} from "./auth.service";
 import {AuthDto} from "./dto";
 import {Tokens} from "./types";
-import {AuthGuard} from "@nestjs/passport";
-import {Request} from 'express'
-import {AtGuard, RtGuard} from "../common/guards";
+import {RtGuard} from "../common/guards";
 import {GetCurrentUser, GetCurrentUserId, Public} from "../common/decorators";
 import {ApiBearerAuth} from "@nestjs/swagger";
 
