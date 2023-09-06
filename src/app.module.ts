@@ -6,9 +6,10 @@ import {AtGuard} from "./common/guards";
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
+import { PayLinkModule } from './payLink/payLink.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule],
+  imports: [AuthModule, PrismaModule, UserModule, PayLinkModule],
   providers: [
     {
       provide: APP_GUARD,
