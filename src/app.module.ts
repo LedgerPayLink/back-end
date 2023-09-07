@@ -7,9 +7,10 @@ import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { PayLinkModule } from './payLink/payLink.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, PayLinkModule],
+  imports: [AuthModule, PrismaModule, UserModule, PayLinkModule, PaymentModule],
   providers: [
     {
       provide: APP_GUARD,
