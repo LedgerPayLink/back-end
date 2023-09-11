@@ -6,7 +6,7 @@ import {ConfigService} from "@nestjs/config";
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
     constructor(private configService: ConfigService) {
         super({
-            datasourceUrl:  configService.get<string>('DATABASE_URL')
+            datasourceUrl:  configService.get<string>('database_url')
         });
     }
 

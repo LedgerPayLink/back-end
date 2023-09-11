@@ -100,7 +100,7 @@ export class AuthService {
                     sub: userId,
                     email,
                 }, {
-                    secret: this.configService.get<string>('JWT_AT_SECRET'),
+                    secret: this.configService.get<string>('jwt.at_secret'),
                     expiresIn: 60 * 15
                 }
             ),
@@ -108,7 +108,7 @@ export class AuthService {
                     sub: userId,
                     email,
                 }, {
-                    secret: this.configService.get<string>('JWT_RT_SECRET'),
+                    secret: this.configService.get<string>('jwt.rt_secret'),
                     expiresIn: 60 * 60 * 24 * 7
                 }
             )

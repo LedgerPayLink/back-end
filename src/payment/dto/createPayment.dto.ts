@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsNumberString, IsString} from "class-validator";
+import {IsNotEmpty, IsNumber, IsNumberString, IsString} from "class-validator";
 
 export class CreatePaymentDto {
 
@@ -10,5 +10,7 @@ export class CreatePaymentDto {
     @IsNumberString()
     tokenAmount: number
 
+    @IsNotEmpty()
+    @IsNumber()
     slippagePer1000: number
 }

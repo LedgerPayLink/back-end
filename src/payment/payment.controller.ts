@@ -1,7 +1,8 @@
-import {Body, Controller, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Query, Req} from '@nestjs/common';
 import {PaymentService} from "./payment.service";
 import {Public} from "../common/decorators";
 import {CreatePaymentDto} from "./dto/createPayment.dto";
+import {GetTokenAmountDto} from "./dto";
 
 @Controller('payment')
 export class PaymentController {
@@ -15,5 +16,11 @@ export class PaymentController {
         @Body() createPaymentDto: CreatePaymentDto
     ) {
         return this.paymentService.createPayment(payLinkId, createPaymentDto);
+    }
+
+    @Public()
+    @Get('/tokenAmount')
+    async getTokenAmount(@Query() getTokenAmountDto: GetTokenAmountDto) {
+        return this.paymentService.getTokenAmount(getTokenAmountDto);
     }
 }

@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import {TokensHelper} from "../common/tokens";
 
-@Module({})
+@Module({
+    providers: [TokensHelper]
+})
 export class UserModule {}
