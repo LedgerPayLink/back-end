@@ -29,11 +29,10 @@ model Eoa {
   nativeToken  Boolean
   tokenAddress String?
   address      String
-  chosen       Boolean  @default(false)
   owner        User     @relation(fields: [ownerId], references: [id])
   ownerId      String
 
-  @@unique([chainId, ownerId])
+  @@unique([chainId, ownerId, tokenAddress])
 }
 
 model PayLink {
