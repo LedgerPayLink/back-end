@@ -12,7 +12,7 @@ export const MAINNET_CHAINS: Chain[] = [
 export const TESTNET_CHAINS: Chain[] = [
   // {chainId: 3, name: "ROPSTEN"},
   // {chainId: 4, name: "RINKEBY"},
-  // { chainId: 5, name: 'GOERLI' },
+  { chainId: 5, name: 'GOERLI' },
   { chainId: 11155111, name: 'SEPOLIA' },
   // { chainId: 97, name: 'BINANCE SMART CHAIN TESTNET' },
   // { chainId: 80001, name: 'MUMBAI' },

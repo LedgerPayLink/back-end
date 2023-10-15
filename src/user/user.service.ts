@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EoaDto } from './dto';
-import { isAddress } from 'ethers';
 import { TokensHelper } from '../common/tokens';
+import {utils} from "ethers";
 
 @Injectable()
 export class UserService {
@@ -22,16 +22,14 @@ export class UserService {
     const chainFound = this.tokenService.chains.find(
       (c) => c.chainId == eoa.chainId,
     );
-    if (!chainFound)
-      throw new NotFoundException(`chain ${eoa.chainId} not supported`);
+    if (!chainFound) throw new NotFoundException(`chain ${eoa.chainId} not supported`);
 
     const tokenFound = this.tokenService.tokens
       .get(chainFound.chainId)
       .find((t) => t.symbol == eoa.symbol);
     if (!tokenFound) throw new NotFoundException('token not supported');
 
-    if (!isAddress(eoa.address))
-      throw new NotFoundException('address given is not a valid address');
+    if (!utils.isAddress(eoa.address)) throw new NotFoundException(`address given is not a valid address: ${eoa.address}`);
 
     await this.prismaService.eoa.create({
       data: {

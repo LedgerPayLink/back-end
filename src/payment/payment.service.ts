@@ -1,21 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {Injectable, Logger, NotFoundException} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { convertToUSD } from '../common/currency';
 import { getTokenPriceInUSDCent } from '../common/contracts';
 import { CreatePaymentDto, GetTokenAmountDto } from './dto';
 import { TokensHelper } from '../common/tokens';
+import getLedgerPayLinkContract from "../common/contracts/ledgerPayLink/ledgerPayLink.contract";
+import {providers, utils} from "ethers";
+import EthDater from "ethereum-block-by-date";
+import {urls} from "../common/providers";
 
 @Injectable()
 export class PaymentService {
+
+  private readonly logger = new Logger(PaymentService.name);
   constructor(
     private prismaService: PrismaService,
     private tokenService: TokensHelper,
   ) {}
 
-  async createPayment(
-    payLinkId: string,
-    createPaymentDto: CreatePaymentDto,
-  ): Promise<{ paymentId: string }> {
+  async createPayment(payLinkId: string, createPaymentDto: CreatePaymentDto,): Promise<{ paymentId: string }> {
     // 1 we check if the payLink id is valid
     const payLink = await this.prismaService.payLink
       .findUnique({
@@ -25,7 +28,20 @@ export class PaymentService {
       })
       .then((pl) => pl);
 
-    if (!payLink) throw new NotFoundException('Invalid PayLink');
+    if (!payLink) throw new NotFoundException('PayLink Not Found');
+
+    const payments = await this.prismaService.payment
+        .findMany({
+          where: {
+            payLinkId: payLinkId,
+            status: 'SUCCESS'
+          },
+        })
+        .then((p) => p);
+
+    payments.forEach(p => {
+      if (p.priceAmount == payLink.priceAmount) throw new NotFoundException('PayLink given already has been paid full');
+    })
 
     // 2 we check if the owner has at least 1 EOA on the chainId
     const chain = payLink.destinationChainId;
@@ -50,8 +66,8 @@ export class PaymentService {
     //   throw new NotFoundException(
     //     `symbol ${symbol} on chain id ${chain} is not supported`,
     //   );
-    const tokenFound = eoas.find((eoa) => eoa.symbol == symbol);
-    if (!tokenFound)
+    const eoa = eoas.find((eoa) => eoa.symbol == symbol);
+    if (!eoa)
       throw new NotFoundException(
         `symbol ${symbol} on chain id ${chain} is not supported`,
       );
@@ -76,6 +92,10 @@ export class PaymentService {
 
     // 5 we create the payment
 
+    // const tokenAmountWei = BigInt(tokenAmountFound ** (eoa.nativeToken ? 18 : (await getErc20Contract(eoa.tokenAddress, payLink.destinationChainId).decimals())))
+    const tokenAmountWei = utils.parseUnits(tokenAmountFound.toString(), 18).toString()
+
+    console.log(tokenAmountWei);
     const { id } = await this.prismaService.payment.create({
       data: {
         expirationDate: new Date(new Date().setHours(4)),
@@ -83,7 +103,10 @@ export class PaymentService {
         fiatCurrency: payLink.fiatCurrency,
         chainId: payLink.destinationChainId,
         symbol: createPaymentDto.symbol,
-        tokenAmount: tokenAmountFound,
+        tokenAddress: eoa.tokenAddress,
+        isTokenNative: eoa.nativeToken,
+        tokenAmount: tokenAmountWei,
+        destinationAddress: eoa.address,
         status: 'PENDING',
         payLinkId: payLinkId,
       },
@@ -110,6 +133,72 @@ export class PaymentService {
     }
 
     return centsUSD / tokenPriceInUSDCents;
+  }
+
+  async validatePayment(paymentId: string): Promise<void> {
+    const payment = await this.prismaService.payment
+        .findUnique({
+          where: {
+            id: paymentId,
+          },
+        })
+        .then((p) => p);
+
+    if (!payment) throw new NotFoundException('Payment Not Found');
+
+
+    const tokenFound = this.tokenService.tokens
+      .get(payment.chainId)
+      .find((t) => t.symbol == payment.symbol);
+
+    const dater = new EthDater(
+        new providers.JsonRpcProvider(urls.get(payment.chainId))
+    );
+
+    const fromBlock = dater.getDate(payment.createdAt)
+
+    const ledgerPayLinkContract = getLedgerPayLinkContract(payment.chainId)
+    if (tokenFound.native) {
+
+    } else {
+      const filter = ledgerPayLinkContract.filters.LPL_PaidWithToken(paymentId)
+      const events = await ledgerPayLinkContract.queryFilter(filter, fromBlock.block);
+      if (events.length == 0) {
+        //TODO mark the payment as checked +1
+        this.logger.error(`No LPL_PaidWithToken event found with paymentId: ${paymentId}`);
+        return;
+      }
+      const paidWithTokenEvent = events[0];
+      const paidWithTokenLogDescription = ledgerPayLinkContract.interface.parseLog({
+        data: paidWithTokenEvent.data,
+        topics: paidWithTokenEvent.topics
+      })
+      const tokenAddress = paidWithTokenLogDescription.args[1] as string;
+      const tokenAmount = paidWithTokenLogDescription.args[2] as bigint;
+      const destinationAddress = paidWithTokenLogDescription.args[3] as string;
+
+      console.log(
+          tokenAddress,
+          tokenAmount.toString(),
+          destinationAddress
+      )
+
+      if (tokenAddress == payment.tokenAddress && tokenAmount.toString() == payment.tokenAmount && destinationAddress == payment.destinationAddress) {
+        await this.prismaService.payment.update({
+          where: {
+            id: paymentId
+          },
+          data: {
+            status: 'SUCCESS',
+            txHash: paidWithTokenEvent.transactionHash
+          }
+        })
+        this.logger.log(`payment ${paymentId} has been validated`);
+      }
+
+    }
+
+
   }
 
   private getPer1000Change(oldValue: number, newValue: number): number {

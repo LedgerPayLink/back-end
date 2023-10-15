@@ -61,17 +61,17 @@ export const MAINNET_TOKENS: Map<number, Token[]> = new Map()
   ]);
 
 export const TESTNET_TOKENS: Map<number, Token[]> = new Map()
-  // .set(5, [
-  //   {
-  //     address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-  //     symbol: 'UNI',
-  //     native: false,
-  //   },
-  //   { address: '', symbol: 'ETH', native: true },
-  // ])
+  .set(5, [
+    {
+      address: '0xd736D71e4DAF79809CD3dA86AF3d1Fa19C045545',
+      symbol: 'ERC20TEST',
+      native: false,
+    },
+    { address: '', symbol: 'ETH', native: true },
+  ])
   .set(11155111, [
     {
-      address: '0xd6D6952Ba5dC8d93E6A480f7f1B52Cfd946B4b1F',
+      address: '0x98F90032B566fA47DB6EC2C4073388715ebbf945',
       symbol: 'ERC20TEST',
       native: false,
     },

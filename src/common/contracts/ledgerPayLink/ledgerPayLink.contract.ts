@@ -1,9 +1,14 @@
-import {Contract, JsonRpcProvider} from "ethers";
+import {Contract, ethers} from "ethers";
 import abiJson from './ledgerPayLink.json'
-import {LegerPayLink} from "./leger-pay-link";
+import {LedgerPayLink} from "./leger-pay-link";
+import {urls} from "../../providers";
 
-const address = "0xEcCA63A924700735b382b0B6c02E9c9Ff4e4a474"
+const deployedLedgerPayLinkAddresses: Map<number, string> = new Map()
+    .set(11155111, "0x513352dB26a38D5894aAE3d47C7C248a6677d1eD")
+    .set(5, "0xeF19006A94C5612FE1dFD47428a71076B8bCeB21")
 
-export default function getLedgerPayLinkContract(): LegerPayLink & Contract {
-    return new Contract(address, abiJson, new JsonRpcProvider(`https://sepolia.infura.io/v3/df99674aba224b7194774125b0712c95`)) as LegerPayLink & Contract
+export default function getLedgerPayLinkContract(chainId: number): LedgerPayLink & Contract {
+    const ledgerPayLinkAddress = deployedLedgerPayLinkAddresses.get(chainId);
+    const url = urls.get(chainId);
+    return new Contract(ledgerPayLinkAddress, abiJson, new ethers.providers.JsonRpcProvider(url)) as LedgerPayLink & Contract
 }

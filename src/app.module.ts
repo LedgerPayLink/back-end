@@ -11,6 +11,7 @@ import { PaymentModule } from './payment/payment.module';
 import {ConfigModule} from "@nestjs/config";
 import configuration from "./config/configuration";
 import {TokensHelper} from "./common/tokens";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -21,7 +22,8 @@ import {TokensHelper} from "./common/tokens";
     PrismaModule,
     UserModule,
     PayLinkModule,
-    PaymentModule
+    PaymentModule,
+    ScheduleModule.forRoot()
   ],
   providers: [
     {

@@ -47,15 +47,19 @@ model PayLink {
 }
 
 model Payment {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
-  expirationDate DateTime
-  priceAmount    Int
-  fiatCurrency   String
-  chainId        Int
-  symbol         String
-  tokenAmount    BigInt
-  status         String
-  payLink        PayLink  @relation(fields: [payLinkId], references: [id])
-  payLinkId      String
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  expirationDate     DateTime
+  priceAmount        Int
+  fiatCurrency       String
+  chainId            Int
+  symbol             String
+  tokenAddress       String?
+  isTokenNative      Boolean  @default(false)
+  tokenAmount        String
+  destinationAddress String
+  status             String
+  txHash             String?
+  payLink            PayLink  @relation(fields: [payLinkId], references: [id])
+  payLinkId          String
 }

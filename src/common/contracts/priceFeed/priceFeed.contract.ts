@@ -1,4 +1,4 @@
-import { Contract, JsonRpcProvider } from 'ethers';
+import {Contract, ethers} from 'ethers';
 import abiJson from './priceFeed.json';
 import { PriceFeed } from './price-feed';
 import { NotFoundException } from '@nestjs/common';
@@ -16,7 +16,7 @@ function getPriceFeedContract(feedAddress: string): PriceFeed & Contract {
   return new Contract(
     feedAddress,
     abiJson,
-    new JsonRpcProvider(
+    new ethers.providers.JsonRpcProvider(
       `https://mainnet.infura.io/v3/df99674aba224b7194774125b0712c95`,
     ),
   ) as PriceFeed & Contract;
@@ -29,7 +29,7 @@ export async function getTokenPriceInUSDCent(symbol: string) {
   return Number(
     BigInt(
       (await getPriceFeedContract(feedAddress.address).latestRoundData())
-        .answer,
+        .answer.toString(),
     ) / BigInt(10 ** 6),
   );
 }
