@@ -11,15 +11,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-
-  hash     String
-  hashedRt String?
-  Eoa      Eoa[]
-  PayLink  PayLink[]
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  email     String    @unique
+  hash      String
+  hashedRt  String?
+  eoas      Eoa[]
+  payLinks  PayLink[]
 }
 
 model Eoa {
@@ -33,15 +32,34 @@ model Eoa {
   owner        User     @relation(fields: [ownerId], references: [id])
   ownerId      String
 
-  @@unique([chainId, symbol, address, ownerId])
+  @@unique([chainId, ownerId, tokenAddress])
 }
 
 model PayLink {
-  id                 String   @id @default(uuid())
-  createdAt          DateTime @default(now())
+  id                 String    @id @default(uuid())
+  createdAt          DateTime  @default(now())
   priceAmount        Int
   fiatCurrency       String
   destinationChainId Int
-  owner              User     @relation(fields: [ownerId], references: [id])
+  owner              User      @relation(fields: [ownerId], references: [id])
   ownerId            String
+  payments           Payment[]
+}
+
+model Payment {
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  expirationDate     DateTime
+  priceAmount        Int
+  fiatCurrency       String
+  chainId            Int
+  symbol             String
+  tokenAddress       String?
+  isTokenNative      Boolean  @default(false)
+  tokenAmount        String
+  destinationAddress String
+  status             String
+  txHash             String?
+  payLink            PayLink  @relation(fields: [payLinkId], references: [id])
+  payLinkId          String
 }

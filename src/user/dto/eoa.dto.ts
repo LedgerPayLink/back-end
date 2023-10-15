@@ -1,15 +1,15 @@
-import {IsNotEmpty, IsNumber, IsString} from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class EoaDto {
-    @IsNotEmpty()
-    @IsNumber()
-    chainId: number
+  @IsNotEmpty()
+  @IsNumber()
+  chainId: number;
 
-    @IsNotEmpty()
-    @IsString()
-    symbol: string
+  @IsNotEmpty()
+  @IsString()
+  symbol: string;
 
-    @IsNotEmpty()
-    @IsString()
-    address: string
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 }

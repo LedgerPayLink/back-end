@@ -7,15 +7,31 @@ import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { PayLinkModule } from './payLink/payLink.module';
+import { PaymentModule } from './payment/payment.module';
+import {ConfigModule} from "@nestjs/config";
+import configuration from "./config/configuration";
+import {TokensHelper} from "./common/tokens";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, PayLinkModule],
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+    load: [configuration]
+  }),
+    AuthModule,
+    PrismaModule,
+    UserModule,
+    PayLinkModule,
+    PaymentModule,
+    ScheduleModule.forRoot()
+  ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: AtGuard
     },
-    UserService
+    UserService,
+      TokensHelper
   ],
   controllers: [UserController]
 })
