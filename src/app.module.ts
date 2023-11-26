@@ -9,20 +9,22 @@ import { UserModule } from './user/user.module';
 import { PayLinkModule } from './payLink/payLink.module';
 import { PaymentModule } from './payment/payment.module';
 import {ConfigModule} from "@nestjs/config";
-import configuration from "./config/configuration";
+import environment from "./environment/environment";
 import {TokensHelper} from "./common/tokens";
 import {ScheduleModule} from "@nestjs/schedule";
+import { ConfigurationModule } from './configuration/configuration.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-    load: [configuration]
+    load: [environment]
   }),
     AuthModule,
     PrismaModule,
     UserModule,
     PayLinkModule,
     PaymentModule,
+    ConfigurationModule,
     ScheduleModule.forRoot()
   ],
   providers: [

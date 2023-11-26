@@ -14,7 +14,7 @@ export class TaskPaymentService {
     ) {}
 
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_2_HOURS)
     async onValidatePayment() {
         this.logger.debug('validate Payment task is started');
         const payments = await this.prismaService.payment

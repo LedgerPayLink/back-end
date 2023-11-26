@@ -6,14 +6,15 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { EoaDto } from './dto';
 import { TokensHelper } from '../common/tokens';
-import {utils} from "ethers";
+import { utils } from 'ethers';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private tokenService: TokensHelper,
-  ) {}
+  ) {
+  }
 
   async addEOA(userId: string, eoa: EoaDto) {
     const user = await this.getUser(userId).then((u) => u);
@@ -49,5 +50,23 @@ export class UserService {
         id: userId,
       },
     });
+  }
+
+  ////////////////////////////////////  QUERIES  ////////////////////////////////////////////
+
+  async getEOAS(userId: string): Promise<EoaDto[]> {
+    return (await this.prismaService.eoa.findMany({
+      where: {
+        ownerId: userId,
+      },
+    }))
+      .map(eoa => (
+        {
+          chainId: eoa.chainId,
+          symbol: eoa.symbol,
+          address: eoa.address,
+        }
+      ),
+    );
   }
 }
