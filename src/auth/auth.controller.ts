@@ -39,7 +39,6 @@ export class AuthController {
   }
 
   @ApiBearerAuth('jwt-refresh')
-  @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
