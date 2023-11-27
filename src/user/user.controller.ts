@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { EoaDto } from './dto';
-import { GetCurrentUserId, Public } from '../common/decorators';
+import { EoaDto } from '../common/dto';
+import { GetCurrentUserId } from '../common/decorators';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('user')
@@ -24,5 +24,4 @@ export class UserController {
     return this.userService.getEOAS(userId);
   }
 
-  eoaTokenList()
 }

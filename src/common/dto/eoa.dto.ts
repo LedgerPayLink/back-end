@@ -11,5 +11,5 @@ export class EoaDto {
 
   @IsNotEmpty()
   @IsString()
-  address: string;
+  EOAAddress: string;
 }

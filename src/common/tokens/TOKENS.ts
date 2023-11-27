@@ -67,7 +67,11 @@ export const TESTNET_TOKENS: Map<number, Token[]> = new Map()
       symbol: 'ERC20TEST',
       native: false,
     },
-    { address: '', symbol: 'ETH', native: true },
+    {
+      address: '',
+      symbol: 'ETH',
+      native: true
+    },
   ])
   .set(11155111, [
     {
@@ -75,7 +79,11 @@ export const TESTNET_TOKENS: Map<number, Token[]> = new Map()
       symbol: 'ERC20TEST',
       native: false,
     },
-    { address: '', symbol: 'ETH', native: true },
+    {
+      address: '',
+      symbol: 'ETH',
+      native: true
+    },
   ]);
 // .set(97, [
 //   {

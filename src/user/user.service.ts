@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { EoaDto } from './dto';
+import { EoaDto } from '../common/dto';
 import { TokensHelper } from '../common/tokens';
 import { utils } from 'ethers';
 
@@ -30,7 +30,7 @@ export class UserService {
       .find((t) => t.symbol == eoa.symbol);
     if (!tokenFound) throw new NotFoundException('token not supported');
 
-    if (!utils.isAddress(eoa.address)) throw new NotFoundException(`address given is not a valid address: ${eoa.address}`);
+    if (!utils.isAddress(eoa.EOAAddress)) throw new NotFoundException(`address given is not a valid address: ${eoa.EOAAddress}`);
 
     await this.prismaService.eoa.create({
       data: {
@@ -38,7 +38,7 @@ export class UserService {
         symbol: tokenFound.symbol,
         tokenAddress: tokenFound.address,
         nativeToken: tokenFound.native,
-        address: eoa.address,
+        address: eoa.EOAAddress,
         ownerId: user.id,
       },
     });
@@ -64,7 +64,7 @@ export class UserService {
         {
           chainId: eoa.chainId,
           symbol: eoa.symbol,
-          address: eoa.address,
+          EOAAddress: eoa.address,
         }
       ),
     );
