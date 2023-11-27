@@ -55,4 +55,20 @@ export class PayLinkService {
       },
     });
   }
+
+  async getPayLinks(userId: string): Promise<PayLinkDto[]> {
+    return (await this.prismaService.payLink.findMany({
+      where: {
+        ownerId: userId,
+      },
+    }))
+      .map(payLink => (
+          {
+            fiatCurrency: payLink.fiatCurrency,
+            priceAmount: payLink.priceAmount,
+            destinationChainId: payLink.destinationChainId,
+          }
+        ),
+      );
+  }
 }

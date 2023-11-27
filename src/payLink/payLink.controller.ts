@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { PayLinkService } from './payLink.service';
 import { GetCurrentUserId } from '../common/decorators';
 import { PayLinkDto } from './dto/payLink.dto';
@@ -16,5 +16,14 @@ export class PayLinkController {
     @Body() payLinkDto: PayLinkDto,
   ) {
     return this.payLinkService.createPayLink(userId, payLinkDto);
+  }
+
+  ////////////////////  QUERIES  /////////////////////////:
+
+  @ApiBearerAuth('jwt')
+  @Get('get_pay_links')
+  @HttpCode(HttpStatus.OK)
+  getEOAs(@GetCurrentUserId() userId: string): Promise<PayLinkDto[]> {
+    return this.payLinkService.getPayLinks(userId);
   }
 }

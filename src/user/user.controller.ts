@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { EoaDto } from '../common/dto';
 import { GetCurrentUserId } from '../common/decorators';
@@ -18,9 +18,9 @@ export class UserController {
   ///////////////////////////////////////// Queries ///////////////////////////////////
 
   @ApiBearerAuth('jwt')
-  @Get('get_eoas/:userId')
+  @Get('get_eoas')
   @HttpCode(HttpStatus.OK)
-  getEOAs(@Param('userId') userId: string): Promise<EoaDto[]> {
+  getEOAs(@GetCurrentUserId() userId: string): Promise<EoaDto[]> {
     return this.userService.getEOAS(userId);
   }
 
