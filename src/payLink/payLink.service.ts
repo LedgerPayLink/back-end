@@ -50,7 +50,7 @@ export class PayLinkService {
     await this.prismaService.payLink.create({
       data: {
         fiatCurrency: payLinkDto.fiatCurrency,
-        priceAmount: payLinkDto.priceAmount,
+        priceAmountInCents: payLinkDto.priceAmountInCents,
         destinationChainId: payLinkDto.destinationChainId,
         ownerId: user.id,
       },
@@ -67,7 +67,7 @@ export class PayLinkService {
           {
             id: payLink.id,
             fiatCurrency: payLink.fiatCurrency,
-            priceAmount: payLink.priceAmount,
+            priceAmountInCents: payLink.priceAmountInCents,
             destinationChainId: payLink.destinationChainId,
             createdAt: payLink.createdAt
           }

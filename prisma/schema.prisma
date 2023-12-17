@@ -32,13 +32,13 @@ model Eoa {
   owner        User     @relation(fields: [ownerId], references: [id])
   ownerId      String
 
-  @@unique([chainId, ownerId, tokenAddress])
+  @@unique([chainId, ownerId])
 }
 
 model PayLink {
   id                 String    @id @default(uuid())
   createdAt          DateTime  @default(now())
-  priceAmount        Int
+  priceAmountInCents Int
   fiatCurrency       String
   destinationChainId Int
   owner              User      @relation(fields: [ownerId], references: [id])
@@ -50,7 +50,7 @@ model Payment {
   id                 String   @id @default(uuid())
   createdAt          DateTime @default(now())
   expirationDate     DateTime
-  priceAmount        Int
+  priceAmountInCents Int
   fiatCurrency       String
   chainId            Int
   symbol             String

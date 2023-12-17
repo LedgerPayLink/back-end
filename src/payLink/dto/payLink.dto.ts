@@ -7,7 +7,7 @@ export class PayLinkDto {
 
   @IsNotEmpty()
   @IsPositive()
-  priceAmount: number;
+  priceAmountInCents: number;
 
   @IsNotEmpty()
   @IsNumber()

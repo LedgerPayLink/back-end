@@ -40,13 +40,13 @@ export class PaymentService {
         .then((p) => p);
 
     payments.forEach(p => {
-      if (p.priceAmount == payLink.priceAmount) throw new NotFoundException('PayLink given already has been paid full');
+      if (p.priceAmountInCents == payLink.priceAmountInCents) throw new NotFoundException('PayLink given already has been paid full');
     })
 
     // 2 we check if the owner has at least 1 EOA on the chainId
     const chain = payLink.destinationChainId;
-    const eoas = await this.prismaService.eoa
-      .findMany({
+    const eoa = await this.prismaService.eoa
+      .findFirst({
         where: {
           ownerId: payLink.ownerId,
           chainId: chain,
@@ -54,29 +54,13 @@ export class PaymentService {
       })
       .then((eoas) => eoas);
 
-    if (eoas.length == 0) throw new NotFoundException('no EOA found');
+    if (!eoa) throw new NotFoundException('no EOA found');
 
-    // 3 we only select the eoas tokens
-    const symbol = createPaymentDto.symbol;
-
-    // const tokenFound = this.tokenService.tokens
-    //   .get(chain)
-    //   .find((t) => t.symbol == symbol);
-    // if (!tokenFound)
-    //   throw new NotFoundException(
-    //     `symbol ${symbol} on chain id ${chain} is not supported`,
-    //   );
-    const eoa = eoas.find((eoa) => eoa.symbol == symbol);
-    if (!eoa)
-      throw new NotFoundException(
-        `symbol ${symbol} on chain id ${chain} is not supported`,
-      );
-
-    // 4 we check if the tokenAmount is ok according to current quote (we validate a slight slippage difference)
+    // we check if the tokenAmount is ok according to current quote (we validate a slight slippage difference)
 
     const tokenAmountFound = await this.getTokenAmount({
       fiatCurrency: payLink.fiatCurrency,
-      amountInCents: payLink.priceAmount,
+      amountInCents: payLink.priceAmountInCents,
       symbol: createPaymentDto.symbol,
     });
 
@@ -99,7 +83,7 @@ export class PaymentService {
     const { id } = await this.prismaService.payment.create({
       data: {
         expirationDate: new Date(new Date().setHours(4)),
-        priceAmount: payLink.priceAmount,
+        priceAmountInCents: payLink.priceAmountInCents,
         fiatCurrency: payLink.fiatCurrency,
         chainId: payLink.destinationChainId,
         symbol: createPaymentDto.symbol,

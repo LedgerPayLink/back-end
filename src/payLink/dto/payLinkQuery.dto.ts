@@ -11,7 +11,7 @@ export class PayLinkDtoQuery {
 
   @IsNotEmpty()
   @IsPositive()
-  priceAmount: number;
+  priceAmountInCents: number;
 
   @IsNotEmpty()
   @IsNumber()
