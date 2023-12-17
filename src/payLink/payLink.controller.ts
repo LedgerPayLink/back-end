@@ -3,6 +3,7 @@ import { PayLinkService } from './payLink.service';
 import { GetCurrentUserId } from '../common/decorators';
 import { PayLinkDto } from './dto/payLink.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { PayLinkDtoQuery } from './dto/payLinkQuery.dto';
 
 @Controller('paylink')
 export class PayLinkController {
@@ -23,7 +24,7 @@ export class PayLinkController {
   @ApiBearerAuth('jwt')
   @Get('get_pay_links')
   @HttpCode(HttpStatus.OK)
-  getEOAs(@GetCurrentUserId() userId: string): Promise<PayLinkDto[]> {
+  getPayLinks(@GetCurrentUserId() userId: string): Promise<PayLinkDtoQuery[]> {
     return this.payLinkService.getPayLinks(userId);
   }
 }

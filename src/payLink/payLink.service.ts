@@ -4,6 +4,7 @@ import { PayLinkDto } from './dto/payLink.dto';
 import { FiatCurrency } from '../common/currency';
 import { UserService } from '../user/user.service';
 import { TokensHelper } from '../common/tokens';
+import { PayLinkDtoQuery } from './dto/payLinkQuery.dto';
 
 @Injectable()
 export class PayLinkService {
@@ -56,7 +57,7 @@ export class PayLinkService {
     });
   }
 
-  async getPayLinks(userId: string): Promise<PayLinkDto[]> {
+  async getPayLinks(userId: string): Promise<PayLinkDtoQuery[]> {
     return (await this.prismaService.payLink.findMany({
       where: {
         ownerId: userId,
@@ -64,9 +65,11 @@ export class PayLinkService {
     }))
       .map(payLink => (
           {
+            id: payLink.id,
             fiatCurrency: payLink.fiatCurrency,
             priceAmount: payLink.priceAmount,
             destinationChainId: payLink.destinationChainId,
+            createdAt: payLink.createdAt
           }
         ),
       );
