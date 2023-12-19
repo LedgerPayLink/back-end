@@ -12,6 +12,7 @@ import {urls} from "../common/providers";
 @Injectable()
 export class PaymentService {
 
+  private readonly SWAP_FEE = 0.01 + 0.003; // 1% LPL fee + 0.3% swap protocol fee
   private readonly logger = new Logger(PaymentService.name);
   constructor(
     private prismaService: PrismaService,
@@ -52,17 +53,19 @@ export class PaymentService {
           chainId: chain,
         },
       })
-      .then((eoas) => eoas);
+      .then((eoa) => eoa);
 
     if (!eoa) throw new NotFoundException('no EOA found');
 
-    // we check if the tokenAmount is ok according to current quote (we validate a slight slippage difference)
+    // 3 we check if the tokenAmount is ok according to current quote (we validate a slight slippage difference)
 
-    const tokenAmountFound = await this.getTokenAmount({
-      fiatCurrency: payLink.fiatCurrency,
-      amountInCents: payLink.priceAmountInCents,
-      symbol: createPaymentDto.symbol,
-    });
+    const tokenAmountFound = await this._getTokenAmount(
+      createPaymentDto.symbol,
+      payLink.fiatCurrency,
+      payLink.priceAmountInCents,
+      eoa.symbol != createPaymentDto.symbol
+    );
+
 
     const per1000Change = this.getPer1000Change(
       createPaymentDto.tokenAmount,
@@ -74,12 +77,11 @@ export class PaymentService {
       );
     }
 
-    // 5 we create the payment
+    // 4 we create the payment
 
     // const tokenAmountWei = BigInt(tokenAmountFound ** (eoa.nativeToken ? 18 : (await getErc20Contract(eoa.tokenAddress, payLink.destinationChainId).decimals())))
     const tokenAmountWei = utils.parseUnits(tokenAmountFound.toString(), 18).toString()
 
-    console.log(tokenAmountWei);
     const { id } = await this.prismaService.payment.create({
       data: {
         expirationDate: new Date(new Date().setHours(4)),
@@ -99,24 +101,35 @@ export class PaymentService {
     return { paymentId: id };
   }
 
-  async getTokenAmount(getTokenAmountDto: GetTokenAmountDto): Promise<number> {
-    const centsUSD =
-      getTokenAmountDto.fiatCurrency == 'USD'
-        ? getTokenAmountDto.amountInCents
-        : await convertToUSD(
-            getTokenAmountDto.fiatCurrency.toUpperCase(),
-            getTokenAmountDto.amountInCents,
-          );
-    let tokenPriceInUSDCents: number;
-    if (getTokenAmountDto.symbol == 'ERC20TEST') {
-      tokenPriceInUSDCents = 43; // $0.43
-    } else {
-      tokenPriceInUSDCents = await getTokenPriceInUSDCent(
-        getTokenAmountDto.symbol.toUpperCase(),
-      );
-    }
+  async getTokenAmount(
+    payLinkId: string,
+    getTokenAmountDto: GetTokenAmountDto)
+    : Promise<number> {
+    const payLink = await this.prismaService.payLink
+      .findUnique({
+        where: {
+          id: payLinkId,
+        },
+      })
+      .then((pl) => pl);
 
-    return centsUSD / tokenPriceInUSDCents;
+    if (!payLink) throw new NotFoundException('PayLink Not Found');
+
+    // we check if it is a swap context
+    const eoa = await this.prismaService.eoa
+      .findFirst({
+        where: {
+          ownerId: payLink.ownerId,
+          chainId: payLink.destinationChainId,
+        },
+      })
+      .then((eoa) => eoa);
+
+    if (!eoa) throw new NotFoundException('no EOA found');
+
+    const swapContext = eoa.symbol != getTokenAmountDto.selectedSymbol;
+
+    return this._getTokenAmount(getTokenAmountDto.selectedSymbol, payLink.fiatCurrency, payLink.priceAmountInCents, swapContext);
   }
 
   async validatePayment(paymentId: string): Promise<void> {
@@ -182,6 +195,33 @@ export class PaymentService {
 
     }
 
+
+  }
+
+  private async _getTokenAmount(
+    selectedSymbol: string,
+    fiatCurrency: string,
+    priceAmountInCents: number,
+    swapContext: boolean
+  ) {
+    const centsUSD =
+      fiatCurrency == 'USD'
+        ? priceAmountInCents
+        : await convertToUSD(
+          fiatCurrency.toUpperCase(),
+          priceAmountInCents,
+        );
+    let tokenPriceInUSDCents: number;
+    if (selectedSymbol == 'ERC20TEST') {
+      tokenPriceInUSDCents = 43; // $0.43
+    } else {
+      tokenPriceInUSDCents = await getTokenPriceInUSDCent(
+        selectedSymbol.toUpperCase(),
+      );
+    }
+
+    const tokenAmount = centsUSD / tokenPriceInUSDCents;
+    return swapContext ? tokenAmount * (1 + this.SWAP_FEE) : tokenAmount;
 
   }
 

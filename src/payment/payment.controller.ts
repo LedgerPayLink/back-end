@@ -25,8 +25,11 @@ export class PaymentController {
   }
 
   @Public()
-  @Get('/tokenAmount')
-  async getTokenAmount(@Query() getTokenAmountDto: GetTokenAmountDto) {
+  @Get('tokenAmount/:payLinkId')
+  async getTokenAmount(
+    @Param('payLinkId') payLinkId: string,
+    @Query() getTokenAmountDto: GetTokenAmountDto
+  ) {
     return this.paymentService.getTokenAmount(getTokenAmountDto);
   }
 }
