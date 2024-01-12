@@ -18,9 +18,7 @@ export class PaymentController {
 
   @Public()
   @Post('validate/:paymentId')
-  async validatePayment(
-      @Param('paymentId') paymentId: string,
-  ) {
+  async validatePayment(@Param('paymentId') paymentId: string) {
     return this.paymentService.validatePayment(paymentId);
   }
 
@@ -28,8 +26,8 @@ export class PaymentController {
   @Get('tokenAmount/:payLinkId')
   async getTokenAmount(
     @Param('payLinkId') payLinkId: string,
-    @Query() getTokenAmountDto: GetTokenAmountDto
+    @Query() getTokenAmountDto: GetTokenAmountDto,
   ) {
-    return this.paymentService.getTokenAmount(getTokenAmountDto);
+    return this.paymentService.getTokenAmount(payLinkId, getTokenAmountDto);
   }
 }

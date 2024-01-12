@@ -12,6 +12,7 @@ import { Tokens } from './types';
 import { RtGuard } from '../common/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from '../common/decorators';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { createUser } from './dto/createUser.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +21,7 @@ export class AuthController {
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  signUp(@Body() dto: AuthDto): Promise<Tokens> {
+  signUp(@Body() dto: createUser): Promise<Tokens> {
     return this.authService.signUp(dto);
   }
 
