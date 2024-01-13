@@ -17,7 +17,7 @@ export class UserService {
   ) {}
 
   async addEOA(userId: string, eoa: EoaDto) {
-    const user = await this.getUser(userId).then((u) => u);
+    const user = await this.getUser(userId);
     if (!user) throw new ForbiddenException('Access Denied');
 
     const chainFound = this.tokenService.chains.find(

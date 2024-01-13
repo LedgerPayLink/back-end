@@ -31,7 +31,7 @@ export class PayLinkService {
       );
 
     // we check if user has at least 1 EOA with the payLinkDto chainId
-    const user = await this.userService.getUser(userId).then((u) => u);
+    const user = await this.userService.getUser(userId);
 
     const eoa = await this.prismaService.eoa
       .findFirst({
@@ -58,20 +58,18 @@ export class PayLinkService {
   }
 
   async getPayLinks(userId: string): Promise<PayLinkDtoQuery[]> {
-    return (await this.prismaService.payLink.findMany({
-      where: {
-        ownerId: userId,
-      },
-    }))
-      .map(payLink => (
-          {
-            id: payLink.id,
-            fiatCurrency: payLink.fiatCurrency,
-            priceAmountInCents: payLink.priceAmountInCents,
-            destinationChainId: payLink.destinationChainId,
-            createdAt: payLink.createdAt
-          }
-        ),
-      );
+    return (
+      await this.prismaService.payLink.findMany({
+        where: {
+          ownerId: userId,
+        },
+      })
+    ).map((payLink) => ({
+      id: payLink.id,
+      fiatCurrency: payLink.fiatCurrency,
+      priceAmountInCents: payLink.priceAmountInCents,
+      destinationChainId: payLink.destinationChainId,
+      createdAt: payLink.createdAt,
+    }));
   }
 }

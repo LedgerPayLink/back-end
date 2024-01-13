@@ -32,6 +32,13 @@ export class AuthController {
     return this.authService.signIn(dto);
   }
 
+  // @Public()
+  // @Get('is_email_exist/:email')
+  // @HttpCode(HttpStatus.OK)
+  // isEmailExist(@Param('email') email: string): Promise<boolean> {
+  //   return this.authService.isEmailExist(email);
+  // }
+
   @ApiBearerAuth('jwt')
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)

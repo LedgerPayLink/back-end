@@ -21,22 +21,35 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
+  async isEmailExist(email: string): Promise<boolean> {
+    const query = await this.prismaService.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+    return !!query;
+  }
+
   async signUp(dto: createUser): Promise<Tokens> {
     let newUser: any = null;
     try {
+      if (this.isEmailExist(dto.email)) {
+        throw new ConflictException('An account already exist with this email');
+      }
       const hash = await this.hashData(dto.password);
-      newUser = await this.prismaService.user
-        .create({
-          data: {
-            email: dto.email,
-            hash,
-            name: dto.name,
-          },
-        })
-        .then((u) => u);
+      newUser = await this.prismaService.user.create({
+        data: {
+          email: dto.email,
+          hash,
+          name: dto.name,
+        },
+      });
     } catch (error) {
       if (error.code == ErrorCodes.enum.uniqueConstraintFailed) {
-        throw new ConflictException('An account already exist with this email');
+        throw new ConflictException(
+          error,
+          'An account already exist with this email',
+        );
       }
       throw error;
     }
@@ -49,13 +62,11 @@ export class AuthService {
   }
 
   async signIn(dto: AuthDto): Promise<Tokens> {
-    const user = await this.prismaService.user
-      .findUnique({
-        where: {
-          email: dto.email,
-        },
-      })
-      .then((u) => u);
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
 
     if (!user || !(await argon2.verify(user.hash, dto.password))) {
       throw new ForbiddenException('incorrect credentials');
@@ -81,13 +92,11 @@ export class AuthService {
   }
 
   async refresh(userId: string, rt: string): Promise<Tokens> {
-    const user = await this.prismaService.user
-      .findUnique({
-        where: {
-          id: userId,
-        },
-      })
-      .then((u) => u);
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
     if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
     const refreshTokensMatches = await argon2.verify(user.hashedRt, rt);
