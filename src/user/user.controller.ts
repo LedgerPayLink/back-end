@@ -7,12 +7,24 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  Res,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { EoaDto } from '../common/dto';
-import { GetCurrentUserId } from '../common/decorators';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
-import { UserDto } from 'src/user/dto/user.dto';
+import { GetCurrentUserId, Public } from '../common/decorators';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { UserDto, UserQueryDto } from 'src/user/dto/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import {
+  destinationFile,
+  editAvatarFileName,
+  handleFileUploadErrors,
+  imageFileFilter,
+} from 'src/common/utils/uploadFile';
 
 @Controller('user')
 export class UserController {
@@ -46,7 +58,31 @@ export class UserController {
   @ApiBearerAuth('jwt')
   @Get('get_user')
   @HttpCode(HttpStatus.OK)
-  getUser(@GetCurrentUserId() userId: string): Promise<any> {
+  getUser(@GetCurrentUserId() userId: string): Promise<UserQueryDto> {
     return this.userService.getUser(userId);
+  }
+
+  @Public()
+  @Post('upload')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: destinationFile,
+        filename: editAvatarFileName,
+      }),
+      fileFilter: imageFileFilter,
+      limits: { fileSize: 1024 * 1024 },
+    }),
+  )
+  uploadFile(@UploadedFiles() file: Express.Multer.File, @Req() req) {
+    handleFileUploadErrors(req);
+    return file;
+  }
+
+  @Public()
+  @Get('getImage/:imgpath')
+  seeUploadedFile(@Param('imgpath') image, @Res() res) {
+    return res.sendFile(image, { root: './files' });
   }
 }

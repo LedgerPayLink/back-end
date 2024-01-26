@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EoaDto } from '../common/dto';
 import { TokensHelper } from '../common/tokens';
 import { utils } from 'ethers';
-import { UserDto } from 'src/user/dto/user.dto';
+import { UserDto, UserQueryDto } from 'src/user/dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -48,11 +48,12 @@ export class UserService {
     });
   }
 
-  async getUser(userId: string) {
+  async getUser(userId: string): Promise<UserQueryDto> {
     return this.prismaService.user.findUnique({
       where: {
         id: userId,
       },
+      select: { id: true, email: true, name: true, avatar: true },
     });
   }
 
@@ -61,9 +62,10 @@ export class UserService {
       data: {
         email: userDto.email,
         name: userDto.name,
-        path: userDto.path,
+        avatar: userDto.avatar,
       },
       where: { id: userId },
+      select: { id: true, email: true, name: true, avatar: true },
     });
   }
 

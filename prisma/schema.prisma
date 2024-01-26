@@ -16,7 +16,7 @@ model User {
   updatedAt DateTime  @updatedAt
   email     String    @unique
   name      String
-  path      String?
+  avatar    String?
   hash      String
   hashedRt  String?
   eoas      Eoa[]
