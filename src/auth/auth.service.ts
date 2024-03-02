@@ -33,7 +33,7 @@ export class AuthService {
   async signUp(dto: createUser): Promise<Tokens> {
     let newUser: any = null;
     try {
-      if (this.isEmailExist(dto.email)) {
+      if (await this.isEmailExist(dto.email)) {
         throw new ConflictException('An account already exist with this email');
       }
       const hash = await this.hashData(dto.password);

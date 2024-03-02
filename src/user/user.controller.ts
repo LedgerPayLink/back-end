@@ -62,7 +62,7 @@ export class UserController {
     return this.userService.getUser(userId);
   }
 
-  @Public()
+  @ApiBearerAuth('jwt')
   @Post('upload')
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(
@@ -75,7 +75,7 @@ export class UserController {
       limits: { fileSize: 1024 * 1024 },
     }),
   )
-  uploadFile(@UploadedFiles() file: Express.Multer.File, @Req() req) {
+  uploadFile(@UploadedFiles() file: Express.Multer.File,@GetCurrentUserId() userId: string, @Body() dto: UserQueryDto, @Req() req) {
     handleFileUploadErrors(req);
     return file;
   }

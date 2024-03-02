@@ -36,7 +36,9 @@ export const editFileName = (req, file, callback) => {
 export const editAvatarFileName = (req, file, callback) => {
   const name = file.originalname.split('.')[0];
   const fileExtName = extname(file.originalname);
-  callback(null, `avatar-${name}${fileExtName}`);
+  const iduser: string = req.user.sub;
+  // callback(null, `avatar-${name}${fileExtName}`);
+  callback(null, `avatar-${iduser}${fileExtName}`);
 };
 
 export const getUserIdFromRequest = (req) => {
